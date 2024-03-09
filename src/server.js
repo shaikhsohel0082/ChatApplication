@@ -5,7 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import connectToDatabase from "./config.js";
-import image from "./profile.js";
+
 import path from "path";
 const app = express();
 const server = http.createServer(app);
