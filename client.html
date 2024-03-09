@@ -1,0 +1,219 @@
+<!-- client.html -->
+<html>
+
+<head>
+    <title>Chat application</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/6dc83f0160.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="main-div">
+        <div id="message-div">
+            <div id="welcome-msg"></div>
+            <div id="content-msg">
+                <div id="reciver">
+                </div>
+                <div id="sender">
+                </div>
+            </div>
+            <div id="type-msg">
+                <input id="msg-input" type="text" placeholder="Enter Your Message..">
+                <audio id="messageSent" src="sounds/cute-level-up-1-189852.mp3" preload="auto"></audio>
+                <audio id="userConnectedAudio" src="sounds/mixkit-wrong-answer-fail-notification-946.wav"></audio>
+
+                <button id="send-btn">Send</button>
+
+            </div>
+        </div>
+        <div id="user-display-div">
+            <div id="connected-user">
+
+                <p>Connected users: <span id="user-counter">0</span></p>
+                <div id="online-users"></div>
+            </div>
+
+        </div>
+    </div>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="config.js"></script>
+    <script>
+        const socket = io.connect('http://localhost:3000');
+        const user = prompt('Enter Your Name');
+
+        const profilePictures = [
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqtOJwyHYsffVaKupV9U-qJndp2xN9GZ8XTQ&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoGy-hex8PkL-exHhiecoJg0yTBNWjGZqxA&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTo6wZotHgjrPC_ZG6NEPLjFTxBgGMQV4qPxQ&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjblZeARzi7VOQ80iM_KN55eQsX2lSmehgIw&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQq6gaTf6N93kzolH98ominWZELW881HqCgw&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq-TFYDJpI85aEcXbKk59DAZU-s5KO5fu8yfu9BNjxjbLjTZKlMGmSs9ERXrbM45S-xSA&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOk5zI97BUmL7XDRQg_swuXxpD8OQD6xqlhEAfgJ0eApkf12olHANi-TadDJG5IlJUlTI&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAhWO1Krrz8bS7tiTEfD-YLoTEaFFEI4SukqtPgkUrJNftu-uTzIa71nm5KbzxhQCCzxw&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJpd3n_zJ1kex6kyxmSWixPLPllBqBfGp66g&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZhv7K4lnBGwAnSxTrC8iTccxEPJDE2krngw&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuuN0nL55Q214FpASOK5UjDqIwATHN6ej_Ng&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRykIJwTqyQ0dg0XYDj77MJfdA11U6kv-rcmA&usqp=CAU",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn0boPBycg68gV2VTRB5yo0iGAVHfQFP2-KA&usqp=CAU",
+        ];
+        socket.emit('user', user);
+        // checking username shuold not be empty
+        function checkUser(user) {
+            if (!user) {
+                alert('Please Enter Your Name')
+                user = prompt('Enter Your Name');
+                checkUser(user);
+            }
+
+        }
+        checkUser(user);
+        //accessing all elements
+        const welcome_msg = document.getElementById('welcome-msg');
+        const content_msg = document.getElementById('content-msg');
+        const type_msg = document.getElementById('type-msg');
+        const msg_input = document.getElementById('msg-input');
+        const send_btn = document.getElementById('send-btn');
+        const user_display_div = document.getElementById('user-display-div');
+        const connected_user = document.getElementById('connected-user');
+        const sender = document.getElementById('sender');
+        const image = getRandomImage(profilePictures);
+        const reciver = document.getElementById('reciver');
+        if (user) {
+            welcome_msg.innerText = "";
+            welcome_msg.innerHTML = `<div><i class="fa-solid fa-circle"></i>&ensp;Welcome,${user} !</div>`;
+            msg_input.focus();
+
+        }
+        //connected user count
+        //connected user count
+        socket.on('connectedUser', (connectedUser) => {
+            const userCounterSpan = document.getElementById('user-counter');
+            const onlineUsersDiv = document.getElementById('online-users');
+
+            userCounterSpan.textContent = connectedUser.userCounter;
+
+            // Update the online users list
+            onlineUsersDiv.innerHTML = '';
+            connectedUser.users.forEach((username) => {
+                const newUserDiv = document.createElement('div');
+                newUserDiv.textContent = username;
+                onlineUsersDiv.appendChild(newUserDiv);
+            });
+        });
+        // Add a new Socket.io listener for the 'userJoined' event
+        socket.on('userJoined', (newUsername) => {
+
+            // Update the UI to notify about the new user join
+            const onlineUsersDiv = document.getElementById('online-users');
+            const newUserDiv = document.createElement('div');
+            newUserDiv.textContent = newUsername;
+            onlineUsersDiv.appendChild(newUserDiv);
+            userConnectedAudio.play();
+        });
+        send_btn.addEventListener('click', () => {
+            console.log('clicked');
+            messageSent.play();
+            let message = msg_input.value;
+            console.log(message);
+            if (!message) {
+                alert('please write a message');
+            } else {
+                msg_input.value = "";
+                msg_input.focus();
+                socket.emit('newMsg', message);
+
+                const profile = document.createElement('div');
+                const msgBox = document.createElement('div');
+                profile.className = 'profile';
+                profile.style.background = `url('${image}')`;
+                profile.style.backgroundSize = 'cover';
+                sender.append(profile);
+                msgBox.className = 'sender-msg';
+                const timestamp = new Date();
+                const formattedTimestamp = `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString()}`;
+                msgBox.innerHTML = `<h4>${user}</h4><h6>${formattedTimestamp}</h6><h3>${message}</h3>`;
+                sender.append(msgBox);
+
+
+
+
+            }
+
+        })
+        //control btn event using enter key
+        msg_input.addEventListener('keydown', (event) => {
+            // console.log(event);
+            if (event.key == 'Enter') {
+                send_btn.click();
+            }
+        })
+
+        function getRandomImage(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        socket.on('broadcastMsg', ({ sender, message, timestamp }) => {
+            const profile = document.createElement('div');
+            const msgBox = document.createElement('div');
+            profile.className = 'profile';
+            profile.style.background = `url('${image}')`;
+            profile.style.backgroundSize = 'cover';
+            if (sender !== user) {
+                reciver.append(profile);
+                msgBox.className = 'reciver-msg';
+            }
+            // Check if the timestamp is a valid Date object
+            const formattedTimestamp =
+                `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`;
+
+            // Check if the sender is the same as the current user
+            if (sender !== user) {
+                msgBox.innerHTML = `<h4>${sender}</h4><h6>${formattedTimestamp}</h6><h3>${message}</h3>`;
+                reciver.append(msgBox);
+            }
+        });
+        const userProfiles = {}; // Object to store user profiles
+        // Function to get or generate a random profile image for a user
+        function getUserProfileImage(username) {
+            if (!userProfiles[username]) {
+                // Generate a random profile image for the new user
+                userProfiles[username] = getRandomImage(profilePictures);
+            }
+            return userProfiles[username];
+        }
+
+       socket.on('existingMessages', (messages) => {
+            const reciver = document.getElementById('reciver');
+
+            // Loop through existing messages and display them
+            messages.forEach((msg) => {
+                const username = msg.username;
+                const image = getUserProfileImage(username); // Get or generate profile image
+
+                const profile = document.createElement('div');
+                const msgBox = document.createElement('div');
+                profile.className = 'profile';
+                profile.style.background = `url('${image}')`;
+                profile.style.backgroundSize = 'cover';
+
+                reciver.append(profile);
+
+                msgBox.className = 'reciver-msg';
+                const formattedTimestamp = new Date(msg.timestamp).toLocaleTimeString();
+                msgBox.innerHTML = `<h4>${username}</h4><h6>${formattedTimestamp}</h6><h3>${msg.message}</h3>`;
+
+                reciver.append(msgBox);
+            });
+        });
+
+
+
+
+
+
+
+    </script>
+
+
+</body>
+
+</html>
