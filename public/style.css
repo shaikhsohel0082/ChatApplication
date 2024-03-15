@@ -54,9 +54,9 @@
 #content-msg {
     height: 82%;
     width: 100%;
-    /* border: 1px solid black; */
+    border: 3px dashed #196164;
 
-    background: url('https://lh3.googleusercontent.com/SZ97RCEv5EVH6iMCDIdHeGJM_BNyHYcnRQ4EdK4V_VyVxLlQS8GY1U3xB8atEBH55OM');
+    background: url('/image.png');
     height: 80%;
     width: 98%;
     margin-left: 9.5px;

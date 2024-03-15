@@ -4,7 +4,7 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
-import connectToDatabase from "./config.js";
+import connectToDatabase from "./src/config.js";
 
 import path from "path";
 const app = express();
@@ -116,6 +116,11 @@ function emitConnectedUsers() {
   const userCounter = users.length;
   io.emit("connectedUser", { userCounter, users });
 }
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(path.join("public", "index.html")));
+});
+
+app.use(express.static(path.resolve("public")));
 
 server.listen(3000, () => {
   console.log("Server is listening on port 3000");

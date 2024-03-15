@@ -181,7 +181,7 @@
             return userProfiles[username];
         }
 
-       socket.on('existingMessages', (messages) => {
+        socket.on('existingMessages', (messages) => {
             const reciver = document.getElementById('reciver');
 
             // Loop through existing messages and display them
