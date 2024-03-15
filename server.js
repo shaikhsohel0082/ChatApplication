@@ -120,7 +120,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.resolve(path.join("public", "index.html")));
 });
 
-app.use(express.static(path.resolve("public")));
+app.use(
+  express.static("public", {
+    setHeaders: (res, path) => {
+      if (path.endsWith(".js")) {
+        res.setHeader("Content-Type", "text/javascript");
+      }
+    },
+  })
+);
 
 server.listen(3000, () => {
   console.log("Server is listening on port 3000");
